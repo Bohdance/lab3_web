@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="info.css">
+    <link rel="stylesheet" href="modal.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <title>Document</title>
+    <style>
+        .filters {
+            list-style: none;
+            padding: 0;
+            display: flex;
+        }
+        .filters li {
+            margin-right: 20px;
+        }
+        .filters li a {
+            text-decoration: none;
+            color: #333;
+            font-weight: bold;
+            font-size: 18px;
+            transition: color 0.3s ease;
+        }
+        .filters li a:hover {
+            color: #ff9900;
+        }
+        .cards-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .card {
+            margin: 20px;
+            padding: 40px;
+            background-color: #f9f9f9;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 200px;
+            text-align: center;
+            position: relative;
+        }
+        .card img {
+            max-width: 100%;
+            border-radius: 10px;
+        }
+        .price {
+            font-weight: bold;
+            color: #333;
+            margin-top: 10px;
+        }
+        .add-to-cart {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #ff9900;
+            color: #fff;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .add-to-cart:hover {
+            background-color: #e68a00;
+        }
+        .cart-container {
+            position: fixed;
+            top: 50px;
+            right: 20px;
+            border: 1px solid #333;
+            background-color: #fff;
+            padding: 10px;
+            border-radius: 5px;
+            width: 200px;
+            display: none;
+        }
+        .cart-header {
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        .cart-item {
+            margin-bottom: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .cart-item .remove-item {
+            color: #ff0000;
+            cursor: pointer;
+        }
+        .scroll-to-top {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: #ff9900;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    z-index: 999;
+}
+
+.scroll-to-top:hover {
+    background-color: #e68a00;
+}
+    </style>
+</head>
+<body>
+<div class="container">
+    <header>
+        <nav class="nav">
+            <div class="search">
+                <input type="text" placeholder="Пошук">
+            </div>
+            <ul class="list">
+                <li class="element"><a href="./index.html"><i class="fas fa-home"></i> Головна</a></li>
+                <li class="element"><a href="./news.html"><i class="fas fa-newspaper"></i> Новини</a></li>
+                <li class="element"><a href="./info.html" class="active">Інформація</a></li>
+                <li class="element"><a href="./your_cabinet.html"><i class="fas fa-user-cog"></i> Ваш кабінет</a></li>
+            </ul>
+            <div class="dropdown">
+                <button class="dropbtn">Країна</button>
+                <div class="dropdown-content">
+                    <a href="#">Україна</a>
+                    <a href="#">Сполучені Штати Коломії</a>
+                    <a href="#">Польща</a>
+                </div>
+            </div>
+        </nav>
+    </header>
+    <main>
+        <div class="filter-panel">
+            <h2>Фільтри</h2>
+            <ul class="filters">
+                <li><a href="#" onclick="filterProducts('dogs')">Пси</a></li>
+                <li><a href="#" onclick="filterProducts('cats')">Котяри</a></li>
+                <!-- Додайте інші можливі фільтри тут -->
+            </ul>
+        </div>
+        <div class="cards-container" id="cardsContainer">
+            <!-- Іконки товарів будуть додані динамічно за допомогою JavaScript -->
+        </div>
+    </main>
+    <footer>
+        <a href="tel:+380660238467" class="phone-number">+380660238467</a>
+        <div class="footer-text">© 2023 ЗооКоломия. Усі права захищені.</div>
+    </footer>
+    <div id="registrationModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeRegistrationForm()">&times;</span>
+            <h2>Підписка на розсилку</h2>
+            <p>Підпишіться на нашу розсилку, щоб отримувати останні новини та пропозиції!</p>
+            <button onclick="closeRegistrationForm()">Підписатись</button>
+            <button onclick="closeRegistrationForm()">Відхилити</button>
+        </div>
+    </div>
+    <div id="advertisementModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeAdvertisementModal()">&times;</span>
+            <h2>Реклама</h2>
+            <p>Тут може бути ваша реклама!</p>
+        </div>
+    </div>
+    <div class="cart-container" id="cartContainer">
+        <div class="cart-header">Кошик</div>
+        <div class="cart-items" id="cartItems"></div>
+        <div class="cart-controls">
+            <button onclick="sortItemsByName()">Сортувати за назвою</button>
+            <button onclick="sortItemsByPrice()">Сортувати за ціною</button>
+        </div>
+    </div>
+</div>
+<button class="scroll-to-top" onclick="scrollToTop()">Наверх <i class="fas fa-arrow-up"></i></button>
+<script>
+    var cart = [];
+
+    function openRegistrationForm() {
+        document.getElementById('registrationModal').style.display = 'block';
+    }
+
+    function closeRegistrationForm() {
+        document.getElementById('registrationModal').style.display = 'none';
+        // Зберігаємо інформацію про те, що користувач підписався на розсилку в локальному сховищі
+        localStorage.setItem('subscription', 'true');
+    }
+
+    function closeAdvertisementModal() {
+        document.getElementById('advertisementModal').style.display = 'none';
+    }
+
+    var products = [
+        { name: 'Бабай', image: './psy/pes1.jpeg', category: 'dogs', price: 500 },
+        { name: 'Небіс', image: './psy/pes2.jpeg', category: 'dogs', price: 750 },
+        { name: 'Гоша', image: './psy/pes3.jpg', category: 'dogs', price: 900 },
+        { name: 'Вуйко', image: './psy/pes4.png', category: 'dogs', price: 600 },
+        { name: 'Лампас', image: './psy/pes5.jpg', category: 'dogs', price: 850 },
+        { name: 'Кулініч', image: './psy/pes6.jpg', category: 'dogs', price: 700 },
+        { name: 'Шугайстер', image: 'cawts/boogacawt.png', category: 'cats', price: 400 },
+        { name: 'Буґа', image: 'cawts/cawtooga.jpeg', category: 'cats', price: 300 },
+        { name: 'Ґуґа', image: 'cawts/googacawt.png', category: 'cats', price: 200 },
+        { name: 'Шляпа', image: 'cawts/okcat.jpg', category: 'cats', price: 450 },
+        { name: 'Кубас', image: 'cawts/omg cat.jpg', category: 'cats', price: 600 },
+        { name: 'Паскуда', image: 'cawts/paskudacat.jpg', category: 'cats', price: 550 },
+        // Додайте інші товари тут
+    ];
+
+    function filterProducts(category) {
+        var cardsContainer = document.getElementById('cardsContainer');
+        cardsContainer.innerHTML = '';
+
+        products.forEach(function (product) {
+            if (category === 'all' || product.category === category) {
+                var card = document.createElement('div');
+                card.classList.add('card');
+
+                var image = document.createElement('img');
+                image.src = product.image;
+                image.alt = product.name;
+
+                var productName = document.createElement('h3');
+                productName.textContent = product.name;
+
+                var price = document.createElement('div');
+                price.classList.add('price');
+                price.textContent = product.price + ' грн';
+
+                var addToCart = document.createElement('button');
+                addToCart.classList.add('add-to-cart');
+                addToCart.innerHTML = '<i class="fas fa-shopping-cart"></i> Додати в кошик';
+                addToCart.onclick = function() {
+                    addToCartClicked(product);
+                };
+
+                card.appendChild(image);
+                card.appendChild(productName);
+                card.appendChild(price);
+                card.appendChild(addToCart);
+                cardsContainer.appendChild(card);
+            }
+        });
+    }
+
+    function addToCartClicked(product) {
+        cart.push(product);
+        renderCart();
+    }
+
+    function removeItemClicked(index) {
+        cart.splice(index, 1);
+        renderCart();
+    }
+
+    function renderCart() {
+        var cartItemsContainer = document.getElementById('cartItems');
+        cartItemsContainer.innerHTML = '';
+        
+        cart.forEach(function(item, index) {
+            var cartItem = document.createElement('div');
+            cartItem.classList.add('cart-item');
+            cartItem.textContent = item.name + ' - ' + item.price + ' грн';
+            
+            var removeButton = document.createElement('span');
+            removeButton.classList.add('remove-item');
+            removeButton.textContent = 'Видалити';
+            removeButton.onclick = function() {
+                removeItemClicked(index);
+            };
+            
+            cartItem.appendChild(removeButton);
+            cartItemsContainer.appendChild(cartItem);
+        });
+
+        var cartContainer = document.getElementById('cartContainer');
+        cartContainer.style.display = 'block';
+    }
+
+    function sortItemsByName() {
+        cart.sort(function(a, b) {
+            var nameA = a.name.toUpperCase();
+            var nameB = b.name.toUpperCase();
+            if (nameA < nameB) {
+                return -1;
+            }
+            if (nameA > nameB) {
+                return 1;
+            }
+            return 0;
+        });
+
+        renderCart();
+    }
+
+    function sortItemsByPrice() {
+        cart.sort(function(a, b) {
+            return a.price - b.price;
+        });
+
+        renderCart();
+    }
+
+// Function to scroll to the top of the page
+function scrollToTop() {
+        window.scrollTo({ top: 0, behavior: 'smooth' }); // Smooth scroll to top
+    }
+
+    window.addEventListener('scroll', function() {
+        var scrollButton = document.querySelector('.scroll-to-top');
+        if (window.scrollY > (2/3) * window.innerHeight) {
+            scrollButton.style.display = 'block';
+        } else {
+            scrollButton.style.display = 'none';
+        }
+    });
+
+    window.onload = function () {
+        filterProducts('all');
+
+        var isSubscribed = localStorage.getItem('subscription');
+        if (!isSubscribed) {
+            setTimeout(function() {
+                openRegistrationForm();
+            }, 5000);
+        }
+
+        window.addEventListener('scroll', function() {
+            if (window.pageYOffset > 1) {
+                document.getElementById('advertisementModal').style.display = 'block';
+                setTimeout(function() {
+                    closeAdvertisementModal();
+                }, 2000);
+            }
+        });
+
+    
+    };
+</script>
+</body>
+</html>
